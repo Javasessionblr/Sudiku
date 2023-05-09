@@ -1,0 +1,58 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import org.apache.poi.ss.usermodel.*;
+
+public class ExcelComparison {
+    public static void main(String[] args) {
+        try {
+            // Open the first Excel file
+            FileInputStream file1 = new FileInputStream("FirstExcel.xlsx");
+            Workbook workbook1 = WorkbookFactory.create(file1);
+            Sheet sheet1 = workbook1.getSheetAt(0);
+
+            // Open the second Excel file
+            FileInputStream file2 = new FileInputStream("SecondExcel.xlsx");
+            Workbook workbook2 = WorkbookFactory.create(file2);
+            Sheet sheet2 = workbook2.getSheetAt(0);
+
+            // Find the matching row in the second Excel sheet, if any
+            Row matchingRow = null;
+            for (Row row : sheet2) {
+                if (row.getCell(0).getStringCellValue().equals(sheet1.getRow(0).getCell(0).getStringCellValue())
+                    && row.getCell(1).getStringCellValue().equals(sheet1.getRow(0).getCell(1).getStringCellValue())
+                    && row.getCell(2).getStringCellValue().equals(sheet1.getRow(0).getCell(2).getStringCellValue())
+                    && row.getCell(3).getStringCellValue().equals(sheet1.getRow(0).getCell(3).getStringCellValue())
+                    && row.getCell(4).getStringCellValue().equals(sheet1.getRow(0).getCell(4).getStringCellValue())
+                    && row.getCell(5).getStringCellValue().equals(sheet1.getRow(0).getCell(5).getStringCellValue())) {
+                    matchingRow = row;
+                    break;
+                }
+            }
+
+            // Fill in the data from the first Excel sheet into the second Excel sheet, if a matching row was found
+            if (matchingRow != null) {
+                CellStyle style = workbook2.createCellStyle();
+                style.setWrapText(true);
+                for (int i = 12; i <= 17; i++) {
+                    Cell sourceCell = sheet1.getRow(0).getCell(i - 12);
+                    Cell targetCell = matchingRow.createCell(i);
+                    targetCell.setCellValue(sourceCell.getStringCellValue());
+                    targetCell.setCellStyle(style);
+                }
+            }
+
+            // Save the changes to the second Excel file
+            FileOutputStream fileOut = new FileOutputStream("SecondExcel.xlsx");
+            workbook2.write(fileOut);
+            fileOut.close();
+
+            // Close the files
+            file1.close();
+            file2.close();
+            workbook1.close();
+            workbook2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
